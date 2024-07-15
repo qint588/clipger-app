@@ -1,15 +1,27 @@
 <script setup lang="ts">
-// import Versions from './components/Versions.vue'
+import { ref, computed, onMounted } from 'vue'
 
-// const ipcHandle = () => window.electron.ipcRenderer.send('ping')
+const search = ref<string>('')
+const inputSearch = ref<HTMLElement|null>(null)
+const isSearch = computed(() => search.value.length)
+
+onMounted(() => {
+  // @ts-ignore (define in dts)
+  window.electron.ipcRenderer.on('focus-input', (_, value) => {
+    if(!value) return
+    inputSearch.value?.focus()
+  })
+})
+
+const handleClearSearch = () => search.value = ''
 </script>
 
 <template>
   <div class="main">
     <div class="toolbar">
-      <input type="text" placeholder="Search the clipboard history" />
+      <input type="text" ref="inputSearch" v-model="search" placeholder="Search the clipboard history" />
       <div class="action">
-        <svg class="close" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <svg v-show="isSearch" @click.prevent="handleClearSearch" class="close" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
         </svg>
         <svg class="setting" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -21,7 +33,7 @@
     <div class="content">
       <div class="left">
         <ul>
-          <li class="active">
+          <!-- <li class="active">
             <img src="https://cdn.icon-icons.com/icons2/836/PNG/512/Google_Chrome_icon-icons.com_66794.png" width="20" height="20" />
             <span class="text-content">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem sit quisquam nemo.</span>
             <div class="shortcut">
@@ -132,11 +144,11 @@
               <img class="icon-command" width="11" height="11" src="https://static-00.iconduck.com/assets.00/mac-command-icon-2048x2048-8rpyvqiu.png" />
               <span>3</span>
             </div>
-          </li>
+          </li> -->
         </ul>
       </div>
       <div class="right">
-        <div class="heading">
+        <!-- <div class="heading">
           <span>
             <small>First copied 48 seconds ago in Google Chrome</small>
           </span>
@@ -151,7 +163,7 @@
           <div class="copied">
             <a href="https://florian.github.io/clipgerapp/">https://florian.github.io/clipgerapp/</a>
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
