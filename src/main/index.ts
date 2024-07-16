@@ -1,9 +1,10 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import TrayBuilder from './tray'
 import ShortCutBuilder from './shortcut'
+import ClipboardManager from './services/clipboard'
 
 let mainWindow: BrowserWindow
 let isQuitting = false
@@ -72,6 +73,7 @@ function createWindow(): void {
   })
 
   new ShortCutBuilder(mainWindow).build()
+  new ClipboardManager(mainWindow)
 }
 
 app.whenReady().then(() => {
@@ -82,7 +84,7 @@ app.whenReady().then(() => {
   })
 
   // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+  // ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
 

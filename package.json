@@ -25,7 +25,8 @@
     "@electron-toolkit/utils": "^3.0.0",
     "better-sqlite3": "^11.1.2",
     "electron-updater": "^6.1.7",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",
@@ -35,11 +36,13 @@
     "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^20.14.8",
     "@types/sqlite3": "^3.1.11",
+    "@types/uuid": "^10.0.0",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
     "electron": "^31.0.2",
     "electron-builder": "^24.13.3",
+    "electron-clipboard-watcher": "^1.0.1",
     "electron-rebuild": "^3.2.9",
     "electron-vite": "^2.3.0",
     "eslint": "^8.57.0",

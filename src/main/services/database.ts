@@ -1,28 +1,25 @@
-import { app } from 'electron'
-import path from 'path'
-import fs from 'fs'
 import Database from 'better-sqlite3'
+import { getPathDatabase } from '../utils'
 
 export default class DatabaseBuilder {
   db: Database.Database
 
   constructor() {
-    this.db = new Database(this.getPath(), {
-      verbose: console.log
+    this.db = new Database(getPathDatabase(), {
+      verbose: console.log,
+      fileMustExist: true
     })
+    this.createTable()
   }
 
-  getPath() {
-    const userDataPath = app.getPath('userData')
-
-    if (!fs.existsSync(userDataPath)) {
-      fs.mkdirSync(userDataPath, { recursive: true })
-    }
-
-    return path.join(userDataPath, 'database-clipger-app.db')
-  }
-
-  findAllCat() {
-    return this.db.prepare('SELECT * from cats').all()
+  createTable() {
+    this.db.exec(`CREATE TABLE IF NOT EXISTS clipboard_histories (
+      id TEXT PRIMARY KEY,
+      data TEXT ,
+      type VARCHAR(50) NOT NULL,
+      attachment_path TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );`)
   }
 }
