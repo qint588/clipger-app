@@ -1,16 +1,8 @@
-import {
-  app,
-  shell,
-  BrowserWindow,
-  ipcMain,
-  globalShortcut,
-  Tray,
-  Menu,
-  nativeImage
-} from 'electron'
+import { app, shell, BrowserWindow, ipcMain, globalShortcut, Tray } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import initTray from './tray'
 
 let mainWindow: BrowserWindow
 let tray: Tray
@@ -43,27 +35,14 @@ function createWindow(): void {
   mainWindow.setWindowButtonVisibility(false)
   mainWindow.setSkipTaskbar(true)
 
-  let trayIcon = nativeImage.createFromPath(icon)
-  trayIcon = trayIcon.resize({ width: 16, height: 16 })
-
-  tray = new Tray(trayIcon)
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Show App',
-      click: () => {
-        mainWindow.show()
-      }
-    },
-    {
-      label: 'Quit',
-      click: () => {
-        isQuitting = true
-        app.quit()
-      }
+  tray = initTray({
+    mainWindow,
+    app,
+    onQuit: () => {
+      isQuitting = true
+      app.quit()
     }
-  ])
-  tray.setToolTip('This is my application.')
-  tray.setContextMenu(contextMenu)
+  })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
