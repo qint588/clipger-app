@@ -9,11 +9,18 @@ onMounted(() => {
   // @ts-ignore (define in dts)
   window.electron.ipcRenderer.on('focus-input', (_, value) => {
     if(!value) return
-    inputSearch.value?.focus()
+    focusInputSearch()
   })
 })
 
-const handleClearSearch = () => search.value = ''
+const handleClearSearch = () => {
+  search.value = ''
+  focusInputSearch()
+}
+
+const focusInputSearch = () => {
+  inputSearch.value?.focus()
+}
 </script>
 
 <template>
