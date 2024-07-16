@@ -1,11 +1,11 @@
-import { app, shell, BrowserWindow, ipcMain, globalShortcut, Tray } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import initTray from './tray'
+import TrayBuilder from './tray'
+import ShortCutBuilder from './shortcut'
 
 let mainWindow: BrowserWindow
-let tray: Tray
 let isQuitting = false
 
 function createWindow(): void {
@@ -35,12 +35,9 @@ function createWindow(): void {
   mainWindow.setWindowButtonVisibility(false)
   mainWindow.setSkipTaskbar(true)
 
-  tray = initTray({
-    mainWindow,
-    app,
+  new TrayBuilder(mainWindow).build({
     onQuit: () => {
       isQuitting = true
-      app.quit()
     }
   })
 
@@ -68,27 +65,17 @@ function createWindow(): void {
     mainWindow.webContents.send('focus-input', true)
   })
 
-  mainWindow.on('ready-to-show', () => {
-    mainWindow.webContents.openDevTools()
-  })
-
   mainWindow.on('blur', () => {
     if (mainWindow.isVisible()) {
       mainWindow.hide()
     }
   })
+
+  new ShortCutBuilder(mainWindow).build()
 }
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
-
-  globalShortcut.register('Control+space', () => {
-    if (!mainWindow.isVisible()) {
-      mainWindow.show()
-    } else {
-      mainWindow.hide()
-    }
-  })
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)

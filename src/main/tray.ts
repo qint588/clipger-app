@@ -1,33 +1,34 @@
-import { BrowserWindow, Menu, nativeImage, Tray } from 'electron'
+import { app, BrowserWindow, Menu, nativeImage, Tray } from 'electron'
 import icon from '../../resources/icon.png?asset'
 
-interface Props {
-  app: Electron.App
+export default class TrayBuilder {
   mainWindow: BrowserWindow
-  onQuit: () => void
-}
 
-const initTray = ({ mainWindow, onQuit }: Props) => {
-  let trayIcon = nativeImage.createFromPath(icon)
-  trayIcon = trayIcon.resize({ width: 16, height: 16 })
+  constructor(mainWindow: BrowserWindow) {
+    this.mainWindow = mainWindow
+  }
 
-  let tray = new Tray(trayIcon)
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Show App',
-      click: () => {
-        mainWindow.show()
+  build(props: { onQuit: () => void }) {
+    let trayIcon = nativeImage.createFromPath(icon)
+    trayIcon = trayIcon.resize({ width: 16, height: 16 })
+
+    let tray = new Tray(trayIcon)
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Show App',
+        click: () => {
+          this.mainWindow.show()
+        }
+      },
+      {
+        label: 'Quit',
+        click: () => {
+          props.onQuit()
+          app.quit()
+        }
       }
-    },
-    {
-      label: 'Quit',
-      click: () => onQuit()
-    }
-  ])
-  tray.setToolTip('This is my application.')
-  tray.setContextMenu(contextMenu)
-
-  return tray
+    ])
+    tray.setToolTip('This is my application.')
+    tray.setContextMenu(contextMenu)
+  }
 }
-
-export default initTray
