@@ -45,8 +45,12 @@ body {
             width: 1.2rem;
             margin-right: 1rem;
         }
-        .setting {
+        .setting,
+        .reload {
             width: 1.5rem;
+        }
+        .reload {
+            margin-right: 1rem;
         }
         .action {
             position: absolute;

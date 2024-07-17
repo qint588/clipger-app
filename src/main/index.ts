@@ -1,13 +1,15 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import TrayBuilder from './tray'
 import ShortCutBuilder from './shortcut'
 import ClipboardManager from './services/clipboard'
+import { ALL_CLIPBOARD, FETCH_ALL_CLIPBOARD, FOCUS_INPUT } from './constants'
 
 let mainWindow: BrowserWindow
 let isQuitting = false
+let clipboardManager: ClipboardManager
 
 function createWindow(): void {
   if (process.platform === 'darwin') {
@@ -63,7 +65,7 @@ function createWindow(): void {
   })
 
   mainWindow.on('show', () => {
-    mainWindow.webContents.send('focus-input', true)
+    mainWindow.webContents.send(FOCUS_INPUT, true)
   })
 
   mainWindow.on('blur', () => {
@@ -72,8 +74,10 @@ function createWindow(): void {
     }
   })
 
+  mainWindow.webContents.openDevTools()
+
   new ShortCutBuilder(mainWindow).build()
-  new ClipboardManager(mainWindow)
+  clipboardManager = new ClipboardManager(mainWindow)
 }
 
 app.whenReady().then(() => {
@@ -83,8 +87,9 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
-  // ipcMain.on('ping', () => console.log('pong'))
+  ipcMain.on(FETCH_ALL_CLIPBOARD, () => {
+    mainWindow.webContents.send(ALL_CLIPBOARD, clipboardManager.findAll())
+  })
 
   createWindow()
 

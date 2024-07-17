@@ -10,9 +10,9 @@ export enum TypeClipboardHistory {
 
 export interface IClipboardManager {
   id?: number
-  data: string
+  data: string | null
   type: TypeClipboardHistory
-  attachment_path?: string
+  attachment_path?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -43,7 +43,7 @@ export default class ClipboardManager {
         if (text.trim().length == 0) {
           return
         }
-        this.storeClipboardHistory({
+        this.store({
           data: text,
           type: TypeClipboardHistory.Text
         })
@@ -51,11 +51,18 @@ export default class ClipboardManager {
     })
   }
 
-  storeClipboardHistory(data: IClipboardManager) {
+  store(data: IClipboardManager) {
     const queryBuilder = this.builder.db.prepare(
       'INSERT INTO clipboard_histories (id, data, type, attachment_path) VALUES (?, ?, ?, ?)'
     )
     const result = queryBuilder.run(uuidv4(), data.data, data.type, data.attachment_path)
-    console.log(result)
+    console.log('STORE_CLIPBOARD_HISTORY', result)
+  }
+
+  findAll(limit: number = 1000): Array<IClipboardManager> {
+    const queryBuilder = this.builder.db.prepare(
+      'SELECT * FROM clipboard_histories ORDER BY created_at DESC LIMIT ?'
+    )
+    return queryBuilder.all(limit) as Array<IClipboardManager>
   }
 }
