@@ -1,6 +1,6 @@
 import { getPathDatabase } from '../utils'
 import Database from 'better-sqlite3'
-import { IClipboardManager, LIMIT_SIZE } from "../types/clipboard";
+import { IClipboardManager, LIMIT_SIZE } from '../types/clipboard'
 
 export default class DatabaseBuilder {
   private db!: Database.Database
@@ -21,7 +21,7 @@ export default class DatabaseBuilder {
     }
   }
 
-  getInstant() {
+  getInstant(): Database.Database {
     return this.db
   }
 
@@ -47,7 +47,7 @@ export default class DatabaseBuilder {
 
   findClipboard(id: string): IClipboardManager | null {
     const queryBuilder = this.getInstant().prepare('SELECT * FROM clipboard_histories WHERE id = ?')
-    return queryBuilder.get(id)
+    return queryBuilder.get(id) as IClipboardManager | null
   }
 
   findClipboards(limit: number = LIMIT_SIZE): Array<IClipboardManager> {

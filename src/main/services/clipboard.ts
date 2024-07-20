@@ -55,7 +55,10 @@ export default class ClipboardManager {
           app_icon: null,
           app_name: null
         }
-        this.databaseBuilder.createClipboard(item)
+        const result = this.databaseBuilder.createClipboard(item)
+        if (result) {
+          this.mainWindow.webContents.send('set:clipboard', result)
+        }
       }
     })
   }
