@@ -195,6 +195,11 @@ const handleScrollList = () => {
               <span>{{ clipboard.content }}</span>
             </div>
           </div>
+          <div class="footer-action">
+            <button>Press enter to copy</button>
+            <button>Delete from history</button>
+            <button>Pin to history</button>
+          </div>
         </template>
       </div>
     </div>

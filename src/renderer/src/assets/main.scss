@@ -147,6 +147,10 @@ body {
       flex: 1;
       width: 43%;
       background-color: $background-color-left;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 50px);
+
 
       .heading {
         display: flex;
@@ -163,7 +167,8 @@ body {
       }
 
       .showed {
-        height: calc(100vh - 47.5px - 50px);
+        flex: 1;
+        //height: calc(100vh - 47.5px - 50px);
         overflow: auto;
 
         -ms-overflow-style: none; /* IE and Edge */
@@ -194,6 +199,36 @@ body {
           white-space: pre-wrap;
           display: block;
           overflow: auto;
+        }
+      }
+      .footer-action {
+        padding: .5rem;
+        border-top: 1px solid #202021;
+        background-color: $background-color-left;
+        button {
+          display: block;
+          width: 100%;
+          border: 1px solid #1d1d1d;
+          height: 35px;
+          margin-bottom: .25rem;
+          border-radius: 5px;
+          background-image: linear-gradient(
+              0deg,
+              hsl(0deg 0% 13%) 0%,
+              hsl(60deg 1% 15%) 50%,
+              hsl(60deg 1% 16%) 100%
+          );
+          cursor: pointer;
+          color: white;
+          text-transform: uppercase;
+          font-size: 12px;
+          &:focus,
+          &:hover {
+            outline: none;
+          }
+          &:last-child {
+            margin-bottom: unset;
+          }
         }
       }
     }
