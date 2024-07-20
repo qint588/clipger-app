@@ -43,16 +43,14 @@ function createWindow(): void {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    shell.openExternal(details.url).then(console.log)
     return { action: 'deny' }
   })
 
-  mainWindow.show()
-
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']).then(console.log)
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html')).then(console.log)
   }
 
   mainWindow.on('close', (event) => {
@@ -69,7 +67,6 @@ function createWindow(): void {
       mainWindow.hide()
     }
   })
-  mainWindow.webContents.openDevTools()
 
   new ShortCutBuilder(mainWindow).build()
   new ClipboardManager(mainWindow)
