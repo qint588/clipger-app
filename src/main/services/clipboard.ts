@@ -1,68 +1,62 @@
-import { BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
+import ClipboardWatcher from 'electron-clipboard-watcher'
 import DatabaseBuilder from './database'
-import clipboardWatcher from 'electron-clipboard-watcher'
 import { v4 as uuidv4 } from 'uuid'
-
-export enum TypeClipboardHistory {
-  Text = 'text',
-  Image = 'image'
-}
-
-export interface IClipboardManager {
-  id?: number
-  data: string | null
-  type: TypeClipboardHistory
-  attachment_path?: string | null
-  created_at?: string
-  updated_at?: string
-}
+import { IClipboardManager } from '../types/clipboard'
 
 export default class ClipboardManager {
-  mainWindow: BrowserWindow
-  builder: DatabaseBuilder
+  protected mainWindow: BrowserWindow
+  protected databaseBuilder!: DatabaseBuilder
 
   constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow
-    this.builder = new DatabaseBuilder()
-
+    this.createDatabase()
+    this.init()
     this.watch()
   }
 
+  createDatabase() {
+    this.databaseBuilder = new DatabaseBuilder()
+  }
+
+  init() {
+    app.whenReady().then(() => {
+      const clipboards = this.databaseBuilder.findClipboards()
+      ipcMain.on('get:clipboards', () => {
+        this.mainWindow.webContents.send('push:clipboards', clipboards)
+      })
+
+      this.mainWindow.on('show', () => {
+        this.mainWindow.webContents.send('set:focus-input', true)
+      })
+    })
+  }
+
   watch() {
-    clipboardWatcher({
+    ClipboardWatcher({
       // (optional) delay in ms between polls
       watchDelay: 500,
 
       // handler for when image data is copied into the clipboard
-      onImageChange: (nativeImage) => {
+      onImageChange: (nativeImage: never) => {
         console.log(nativeImage)
       },
 
       // handler for when text data is copied into the clipboard
       onTextChange: (text: string) => {
-        if (text.trim().length == 0) {
+        if (text.trim().length == 0 || this.mainWindow.isVisible()) {
           return
         }
-        this.store({
-          data: text,
-          type: TypeClipboardHistory.Text
-        })
+        const item: IClipboardManager = {
+          id: uuidv4(),
+          content: text,
+          type: 'text',
+          attachment_path: null,
+          app_icon: null,
+          app_name: null
+        }
+        this.databaseBuilder.createClipboard(item)
       }
     })
-  }
-
-  store(data: IClipboardManager) {
-    const queryBuilder = this.builder.db.prepare(
-      'INSERT INTO clipboard_histories (id, data, type, attachment_path) VALUES (?, ?, ?, ?)'
-    )
-    const result = queryBuilder.run(uuidv4(), data.data, data.type, data.attachment_path)
-    console.log('STORE_CLIPBOARD_HISTORY', result)
-  }
-
-  findAll(limit: number = 1000): Array<IClipboardManager> {
-    const queryBuilder = this.builder.db.prepare(
-      'SELECT * FROM clipboard_histories ORDER BY created_at DESC LIMIT ?'
-    )
-    return queryBuilder.all(limit) as Array<IClipboardManager>
   }
 }

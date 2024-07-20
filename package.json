@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "description": "An Electron application with Vue and TypeScript",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts,.vue --fix",
@@ -14,7 +12,8 @@
     "start": "electron-vite preview",
     "dev": "electron-vite dev -w",
     "build": "npm run typecheck && electron-vite build",
-    "postinstall": "electron-builder install-app-deps && electron-rebuild -f -w better-sqlite3",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "npm run build && electron-builder --mac",
@@ -23,10 +22,11 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
-    "better-sqlite3": "^11.1.2",
+    "better-sqlite3": "^11.0.0",
     "electron-updater": "^6.1.7",
-    "sqlite3": "^5.1.7",
-    "uuid": "^10.0.0"
+    "moment": "^2.30.1",
+    "uuid": "^10.0.0",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",

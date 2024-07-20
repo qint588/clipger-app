@@ -36,4 +36,5 @@ $ yarn build:linux
 ### Ref
 ```
 https://florian.github.io/clipgerapp/
+https://github.com/WiseLibs/better-sqlite3/blob/master/docs/api.md
 ```

@@ -11,5 +11,19 @@ export default class ShortCutBuilder {
     globalShortcut.register('Control+space', () => {
       !this.mainWindow.isVisible() ? this.mainWindow.show() : this.mainWindow.hide()
     })
+
+    this.mainWindow.on('show', () => {
+      // globalShortcut.register('Enter', () => {
+      //   console.log('Enter key is pressed')
+      // })
+      globalShortcut.register('esc', () => {
+        this.mainWindow.hide()
+      })
+    })
+
+    this.mainWindow.on('hide', () => {
+      globalShortcut.unregister('esc')
+      globalShortcut.unregister('Enter')
+    })
   }
 }

@@ -1,15 +1,13 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import TrayBuilder from './tray'
 import ShortCutBuilder from './shortcut'
 import ClipboardManager from './services/clipboard'
-import { ALL_CLIPBOARD, FETCH_ALL_CLIPBOARD, FOCUS_INPUT } from './constants'
 
 let mainWindow: BrowserWindow
 let isQuitting = false
-let clipboardManager: ClipboardManager
 
 function createWindow(): void {
   if (process.platform === 'darwin') {
@@ -18,7 +16,7 @@ function createWindow(): void {
 
   mainWindow = new BrowserWindow({
     width: 940,
-    height: 580,
+    height: 584,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -49,6 +47,8 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
+  mainWindow.show()
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
@@ -64,20 +64,15 @@ function createWindow(): void {
     }
   })
 
-  mainWindow.on('show', () => {
-    mainWindow.webContents.send(FOCUS_INPUT, true)
-  })
-
   mainWindow.on('blur', () => {
     if (mainWindow.isVisible()) {
       mainWindow.hide()
     }
   })
-
   mainWindow.webContents.openDevTools()
 
   new ShortCutBuilder(mainWindow).build()
-  clipboardManager = new ClipboardManager(mainWindow)
+  new ClipboardManager(mainWindow)
 }
 
 app.whenReady().then(() => {
@@ -85,10 +80,6 @@ app.whenReady().then(() => {
 
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
-  })
-
-  ipcMain.on(FETCH_ALL_CLIPBOARD, () => {
-    mainWindow.webContents.send(ALL_CLIPBOARD, clipboardManager.findAll())
   })
 
   createWindow()

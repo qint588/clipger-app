@@ -2,12 +2,18 @@ import { app } from 'electron'
 import fs from 'fs'
 import path from 'path'
 
-export const getPathDatabase = () => {
+export const getPathDatabase = (): string => {
   const userDataPath = app.getPath('userData')
 
-  if (!fs.existsSync(userDataPath)) {
-    fs.mkdirSync(userDataPath, { recursive: true })
+  const folderDatabasePath = path.join(userDataPath, 'Databases')
+  if (!fs.existsSync(folderDatabasePath)) {
+    fs.mkdirSync(folderDatabasePath, { recursive: true })
   }
 
-  return path.join(userDataPath, 'database-clipger-app.db')
+  const fileDatabasePath = path.join(folderDatabasePath, 'clipger_app.db')
+  if (!fs.existsSync(fileDatabasePath)) {
+    fs.writeFileSync(fileDatabasePath, '')
+  }
+
+  return fileDatabasePath
 }

@@ -1,25 +1,59 @@
-import Database from 'better-sqlite3'
 import { getPathDatabase } from '../utils'
+import Database from 'better-sqlite3'
+import { IClipboardManager, LIMIT_SIZE } from "../types/clipboard";
 
 export default class DatabaseBuilder {
-  db: Database.Database
+  private db!: Database.Database
 
   constructor() {
-    this.db = new Database(getPathDatabase(), {
-      verbose: console.log,
-      fileMustExist: true
-    })
-    this.createTable()
+    this.createDataBase().then()
   }
 
-  createTable() {
-    this.db.exec(`CREATE TABLE IF NOT EXISTS clipboard_histories (
+  async createDataBase(): Promise<boolean> {
+    try {
+      const path = getPathDatabase()
+      this.db = new Database(path, { verbose: console.log, fileMustExist: true })
+      this.initClipboardTable()
+      return true
+    } catch (error) {
+      console.log(error)
+      return false
+    }
+  }
+
+  getInstant() {
+    return this.db
+  }
+
+  initClipboardTable(): void {
+    const sql = `CREATE TABLE IF NOT EXISTS clipboard_histories (
       id TEXT PRIMARY KEY,
-      data TEXT ,
-      type VARCHAR(50) NOT NULL,
+      content TEXT,
       attachment_path TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );`)
+      type TEXT,
+      app_icon TEXT,
+      app_name TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`
+    this.getInstant().exec(sql)
+  }
+
+  createClipboard(data: IClipboardManager): IClipboardManager | null {
+    const sql = `INSERT INTO clipboard_histories (id, content, attachment_path, type, app_icon, app_name)
+        VALUES (@id, @content, @attachment_path, @type, @app_icon, @app_name)`
+    this.getInstant().prepare(sql).run(data)
+    return this.findClipboard(data.id)
+  }
+
+  findClipboard(id: string): IClipboardManager | null {
+    const queryBuilder = this.getInstant().prepare('SELECT * FROM clipboard_histories WHERE id = ?')
+    return queryBuilder.get(id)
+  }
+
+  findClipboards(limit: number = LIMIT_SIZE): Array<IClipboardManager> {
+    const queryBuilder = this.getInstant().prepare(
+      'SELECT * FROM clipboard_histories ORDER BY created_at DESC LIMIT ?'
+    )
+    return queryBuilder.all(limit) as Array<IClipboardManager>
   }
 }
