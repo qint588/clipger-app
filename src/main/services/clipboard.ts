@@ -21,8 +21,8 @@ export default class ClipboardManager {
 
   init() {
     app.whenReady().then(() => {
-      const clipboards = this.databaseBuilder.findClipboards()
       ipcMain.on('get:clipboards', () => {
+        const clipboards = this.databaseBuilder.findClipboards()
         this.mainWindow.webContents.send('push:clipboards', clipboards)
       })
 

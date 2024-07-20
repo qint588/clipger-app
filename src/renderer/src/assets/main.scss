@@ -79,6 +79,10 @@ body {
       width: 57%;
       flex-shrink: 0;
 
+      .icon-history {
+        width: 1.4rem;
+      }
+
       img {
         object-fit: contain;
         object-position: center;

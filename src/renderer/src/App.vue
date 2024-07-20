@@ -40,6 +40,11 @@ onMounted(() => {
     }
   })
 
+  // @ts-ignore (define in dts)
+  window.electron.ipcRenderer.on('push:clipboards', (_: never, data: IClipboardManager[]) => {
+    clipboards.value = data
+  })
+
   handleFetchClipboard()
 })
 
@@ -59,11 +64,6 @@ const focusInputSearch = () => {
 const handleFetchClipboard = () => {
   // @ts-ignore (define in dts)
   window.electron.ipcRenderer.send('get:clipboards')
-
-  // @ts-ignore (define in dts)
-  window.electron.ipcRenderer.on('push:clipboards', (_: never, data: IClipboardManager[]) => {
-    clipboards.value = data
-  })
 }
 
 const handleChangeIndexActive = (index: number) => {
@@ -159,12 +159,20 @@ const handleScrollList = () => {
             :class="{ active: index === indexActive }"
             @click="handleChangeIndexActive(index)"
           >
-            <img
-              src="https://cdn.icon-icons.com/icons2/836/PNG/512/Google_Chrome_icon-icons.com_66794.png"
-              width="20"
-              height="20"
-              alt=""
-            />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="icon-history"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+              />
+            </svg>
             <span class="text-content">{{ item.content }}</span>
             <div class="shortcut">
               <template v-if="index <= 9">
