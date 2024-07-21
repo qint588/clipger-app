@@ -11,7 +11,7 @@ let isQuitting = false
 
 function createWindow(): void {
   if (process.platform === 'darwin') {
-    app.dock.hide()
+    // app.dock.hide()
   }
 
   mainWindow = new BrowserWindow({
@@ -67,9 +67,8 @@ function createWindow(): void {
       mainWindow.hide()
     }
   })
-
+  mainWindow['clipboardManager'] = new ClipboardManager(mainWindow)
   new ShortCutBuilder(mainWindow).build()
-  new ClipboardManager(mainWindow)
 }
 
 app.whenReady().then(() => {

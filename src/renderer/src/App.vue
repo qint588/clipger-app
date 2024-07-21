@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import moment from 'moment'
 import { IClipboardManager, LIMIT_SIZE } from '../../main/types/clipboard'
 
@@ -48,6 +48,13 @@ onMounted(() => {
   handleFetchClipboard()
 })
 
+watch(clipboards, () => {
+  // @ts-ignore (define in dts)
+  window.electron.ipcRenderer.on('get:clipboard-selected', () => {
+    handleSelected()
+  })
+})
+
 const clipboard = computed<IClipboardManager | null>(() => {
   return clipboards.value[indexActive.value] ?? null
 })
@@ -85,6 +92,13 @@ const handleScrollList = () => {
   } else {
     list.scrollTop = 0
   }
+}
+
+const handleSelected = () => {
+  window.electron.ipcRenderer.send('set:clipboard-selected', {
+    index: indexActive.value,
+    id: clipboards.value[indexActive.value]?.id ?? null
+  })
 }
 </script>
 
@@ -157,7 +171,8 @@ const handleScrollList = () => {
             v-for="(item, index) in clipboards"
             :key="index"
             :class="{ active: index === indexActive }"
-            @click="handleChangeIndexActive(index)"
+            @mouseover="handleChangeIndexActive(index)"
+            @click="handleSelected"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +219,7 @@ const handleScrollList = () => {
             </div>
           </div>
           <div class="footer-action">
-            <button>Press enter to copy</button>
+            <button @click.prevent="handleSelected">Press enter to copy</button>
             <button>Delete from history</button>
             <button>Pin to history</button>
           </div>

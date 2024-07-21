@@ -1,8 +1,15 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import electron, { app, BrowserWindow, ipcMain } from 'electron'
 import ClipboardWatcher from 'electron-clipboard-watcher'
 import DatabaseBuilder from './database'
 import { v4 as uuidv4 } from 'uuid'
 import { IClipboardManager } from '../types/clipboard'
+import wxw from 'wxw'
+import { execSync } from 'child_process'
+
+interface DataSelectedEvent {
+  index: number
+  id: string | null
+}
 
 export default class ClipboardManager {
   protected mainWindow: BrowserWindow
@@ -11,25 +18,14 @@ export default class ClipboardManager {
   constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow
     this.createDatabase()
-    this.init()
     this.watch()
+    app.whenReady().then(() => {
+      this.init()
+    })
   }
 
   createDatabase() {
     this.databaseBuilder = new DatabaseBuilder()
-  }
-
-  init() {
-    app.whenReady().then(() => {
-      ipcMain.on('get:clipboards', () => {
-        const clipboards = this.databaseBuilder.findClipboards()
-        this.mainWindow.webContents.send('push:clipboards', clipboards)
-      })
-
-      this.mainWindow.on('show', () => {
-        this.mainWindow.webContents.send('set:focus-input', true)
-      })
-    })
   }
 
   watch() {
@@ -61,5 +57,55 @@ export default class ClipboardManager {
         }
       }
     })
+  }
+
+  init(): void {
+    ipcMain.on('get:clipboards', () => {
+      const clipboards = this.databaseBuilder.findClipboards()
+      this.mainWindow.webContents.send('push:clipboards', clipboards)
+    })
+
+    ipcMain.on('set:clipboard-selected', (_, data: DataSelectedEvent) =>
+      this.processSelected(data)
+    )
+
+    this.mainWindow.on('show', () => {
+      this.mainWindow.webContents.send('set:focus-input', true)
+    })
+  }
+
+  selected(): void {
+    this.mainWindow.webContents.send('get:clipboard-selected', true)
+    ipcMain.once('push:clipboard-selected', (_, data: DataSelectedEvent) =>
+      this.processSelected(data)
+    )
+  }
+
+  processSelected(data: DataSelectedEvent) {
+    const clipboard = this.databaseBuilder.findClipboard(data.id ?? '')
+    if (clipboard) {
+      this.copyToClipboard(clipboard)
+      this.pasteToCurrentApp()
+    }
+    this.mainWindow.hide()
+  }
+
+  copyToClipboard(clipboard: IClipboardManager): void {
+    if (clipboard.type === 'text' && clipboard.content.length) {
+      electron.clipboard.writeText(clipboard.content, 'clipboard')
+    }
+  }
+
+  pasteToCurrentApp(): void {
+    if (process.platform === 'win32') {
+      setTimeout(() => wxw('key', 'ctrl+v'), 20)
+    } else if (process.platform === 'darwin') {
+      execSync(
+        `osascript -e 'tell application "System Events" to keystroke tab using command down'`
+      )
+      execSync(
+        `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
+      )
+    }
   }
 }
