@@ -1,6 +1,10 @@
 import { app, BrowserWindow, Menu, nativeImage, Tray } from 'electron'
 import icon from '../../resources/icon.png?asset'
 
+interface BuildProps {
+  onQuit?: () => void
+}
+
 export default class TrayBuilder {
   mainWindow: BrowserWindow
 
@@ -8,11 +12,11 @@ export default class TrayBuilder {
     this.mainWindow = mainWindow
   }
 
-  build(props: { onQuit: () => void }) {
+  build(props: BuildProps) {
     let trayIcon = nativeImage.createFromPath(icon)
     trayIcon = trayIcon.resize({ width: 16, height: 16 })
 
-    let tray = new Tray(trayIcon)
+    const tray = new Tray(trayIcon)
     const contextMenu = Menu.buildFromTemplate([
       {
         label: 'Show App',
@@ -23,7 +27,7 @@ export default class TrayBuilder {
       {
         label: 'Quit',
         click: () => {
-          props.onQuit()
+          props.onQuit && props.onQuit()
           app.quit()
         }
       }
