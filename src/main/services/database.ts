@@ -56,4 +56,14 @@ export default class DatabaseBuilder {
     )
     return queryBuilder.all(limit) as Array<IClipboardManager>
   }
+
+  deleteClipboard(id: string): boolean {
+    const sql = 'DELETE FROM clipboard_histories WHERE id = ?'
+    return !!this.getInstant().prepare(sql).run(id)
+  }
+
+  clearClipboards(): boolean {
+    const sql = 'DELETE FROM clipboard_histories'
+    return !!this.getInstant().prepare(sql).run()
+  }
 }

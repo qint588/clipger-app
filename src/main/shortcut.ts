@@ -20,7 +20,7 @@ export default class ShortCutBuilder {
         this.clipboardManager.selected()
       })
       globalShortcut.register('command+x', () => {
-        console.log('Command+delete key is pressed')
+        this.clipboardManager.delete()
       })
       globalShortcut.register('command+p', () => {
         console.log('Command+p key is pressed')

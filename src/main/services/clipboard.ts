@@ -4,6 +4,7 @@ import DatabaseBuilder from './database'
 import { v4 as uuidv4 } from 'uuid'
 import { IClipboardManager } from '../types/clipboard'
 import { execSync } from 'child_process'
+import { showNotification } from '../utils'
 
 interface DataSelectedEvent {
   index: number
@@ -64,9 +65,14 @@ export default class ClipboardManager {
       this.mainWindow.webContents.send('push:clipboards', clipboards)
     })
 
-    ipcMain.on('set:clipboard-selected', (_, data: DataSelectedEvent) =>
-      this.processSelected(data)
-    )
+    ipcMain.on('set:clipboard-selected', (_, data: DataSelectedEvent) => this.processSelected(data))
+
+    ipcMain.on('set:clipboard-delete', (_, data: DataSelectedEvent) => this.processDelete(data))
+
+    ipcMain.on('set:clipboard-clear', (_, result: boolean) => {
+      if (!result) return
+      this.processClear()
+    })
 
     this.mainWindow.on('show', () => {
       this.mainWindow.webContents.send('set:focus-input', true)
@@ -77,12 +83,36 @@ export default class ClipboardManager {
     this.mainWindow.webContents.send('get:clipboard-selected', true)
   }
 
+  delete(): void {
+    this.mainWindow.webContents.send('get:clipboard-delete', true)
+  }
+
   processSelected(data: DataSelectedEvent) {
     const clipboard = this.databaseBuilder.findClipboard(data.id ?? '')
     if (clipboard) {
       this.copyToClipboard(clipboard)
       this.pasteToCurrentApp()
     }
+  }
+
+  processDelete(data: DataSelectedEvent) {
+    if (!data.id) return
+
+    const result = this.databaseBuilder.deleteClipboard(data.id)
+    if (result) {
+      this.mainWindow.webContents.send('set:clipboard-deleted', result)
+      return
+    }
+    showNotification('Error: fail on delete')
+  }
+
+  processClear() {
+    const result = this.databaseBuilder.clearClipboards()
+    if (result) {
+      this.mainWindow.webContents.send('set:clipboard-cleared', result)
+      return
+    }
+    showNotification('Error: fail on clear')
   }
 
   copyToClipboard(clipboard: IClipboardManager): void {
