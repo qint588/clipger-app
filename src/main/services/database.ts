@@ -12,11 +12,11 @@ export default class DatabaseBuilder {
   async createDataBase(): Promise<boolean> {
     try {
       const path = getPathDatabase()
-      this.db = new Database(path, { verbose: console.log, fileMustExist: true })
+      this.db = new Database(path, { fileMustExist: true })
       this.initClipboardTable()
       return true
     } catch (error) {
-      console.log(error)
+      console.log('Error', error)
       return false
     }
   }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, watchEffect } from "vue";
 import moment from 'moment'
 import { IClipboardManager, LIMIT_SIZE } from '../../main/types/clipboard'
 
@@ -46,11 +46,9 @@ onMounted(() => {
   })
 
   handleFetchClipboard()
-})
 
-watch(clipboards, () => {
-  // @ts-ignore (define in dts)
   window.electron.ipcRenderer.on('get:clipboard-selected', () => {
+    console.log('hello')
     handleSelected()
   })
 })
@@ -172,7 +170,6 @@ const handleSelected = () => {
             :key="index"
             :class="{ active: index === indexActive }"
             @mouseover="handleChangeIndexActive(index)"
-            @click="handleSelected"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

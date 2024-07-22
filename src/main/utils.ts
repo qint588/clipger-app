@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, Notification } from 'electron'
 import fs from 'fs'
 import path from 'path'
 
@@ -16,4 +16,13 @@ export const getPathDatabase = (): string => {
   }
 
   return fileDatabasePath
+}
+
+export const showNotification = (message: string): void => {
+  const title = 'Clipger App'
+  const settings = {
+    title: title,
+    body: message
+  }
+  new Notification(settings).show()
 }

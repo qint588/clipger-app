@@ -3,7 +3,6 @@ import ClipboardWatcher from 'electron-clipboard-watcher'
 import DatabaseBuilder from './database'
 import { v4 as uuidv4 } from 'uuid'
 import { IClipboardManager } from '../types/clipboard'
-import wxw from 'wxw'
 import { execSync } from 'child_process'
 
 interface DataSelectedEvent {
@@ -15,8 +14,8 @@ export default class ClipboardManager {
   protected mainWindow: BrowserWindow
   protected databaseBuilder!: DatabaseBuilder
 
-  constructor(mainWindow: BrowserWindow) {
-    this.mainWindow = mainWindow
+  constructor() {
+    this.mainWindow = app['mainWindow']
     this.createDatabase()
     this.watch()
     app.whenReady().then(() => {
@@ -76,9 +75,6 @@ export default class ClipboardManager {
 
   selected(): void {
     this.mainWindow.webContents.send('get:clipboard-selected', true)
-    ipcMain.once('push:clipboard-selected', (_, data: DataSelectedEvent) =>
-      this.processSelected(data)
-    )
   }
 
   processSelected(data: DataSelectedEvent) {
@@ -87,7 +83,6 @@ export default class ClipboardManager {
       this.copyToClipboard(clipboard)
       this.pasteToCurrentApp()
     }
-    this.mainWindow.hide()
   }
 
   copyToClipboard(clipboard: IClipboardManager): void {
@@ -97,9 +92,7 @@ export default class ClipboardManager {
   }
 
   pasteToCurrentApp(): void {
-    if (process.platform === 'win32') {
-      setTimeout(() => wxw('key', 'ctrl+v'), 20)
-    } else if (process.platform === 'darwin') {
+    if (process.platform === 'darwin') {
       execSync(
         `osascript -e 'tell application "System Events" to keystroke tab using command down'`
       )

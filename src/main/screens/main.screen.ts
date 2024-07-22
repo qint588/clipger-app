@@ -1,9 +1,6 @@
 import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'path'
-import TrayBuilder from '../tray'
 import { is } from '@electron-toolkit/utils'
-import ClipboardManager from '../services/clipboard'
-import ShortCutBuilder from '../shortcut'
 import icon from '../../../resources/icon.png?asset'
 
 export default function createMainWindow(): BrowserWindow {
@@ -29,19 +26,15 @@ export default function createMainWindow(): BrowserWindow {
   mainWindow.setWindowButtonVisibility(false)
   mainWindow.setSkipTaskbar(true)
 
-  new TrayBuilder(mainWindow).build({
-    onQuit: () => {}
-  })
-
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url).then(console.log)
+    shell.openExternal(details.url).then()
     return { action: 'deny' }
   })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']).then(console.log)
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']).then()
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html')).then(console.log)
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html')).then()
   }
 
   mainWindow.on('close', () => {
@@ -53,8 +46,6 @@ export default function createMainWindow(): BrowserWindow {
       mainWindow.hide()
     }
   })
-  mainWindow['clipboardManager'] = new ClipboardManager(mainWindow)
-  new ShortCutBuilder(mainWindow).build()
 
   return mainWindow
 }
