@@ -121,14 +121,17 @@ export default class ClipboardManager {
     }
   }
 
-  pasteToCurrentApp(): void {
+  async pasteToCurrentApp(): Promise<void> {
     if (process.platform === 'darwin') {
+      await app.dock.show()
       execSync(
         `osascript -e 'tell application "System Events" to keystroke tab using command down'`
       )
       execSync(
         `osascript -e 'tell application "System Events" to keystroke "v" using command down'`
       )
+      await new Promise((resolve) => setTimeout(resolve, 750))
+      app.dock.hide()
     }
   }
 }

@@ -23,6 +23,10 @@ export default function createMainWindow(): BrowserWindow {
     frame: false
   })
 
+  if (process.platform === 'darwin') {
+    app.dock.hide()
+  }
+
   mainWindow.setWindowButtonVisibility(false)
   mainWindow.setSkipTaskbar(true)
 
