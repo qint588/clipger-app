@@ -39,24 +39,26 @@ export default class ClipboardManager {
       },
 
       // handler for when text data is copied into the clipboard
-      onTextChange: (text: string) => {
-        if (text.trim().length == 0 || this.mainWindow.isVisible()) {
-          return
-        }
-        const item: IClipboardManager = {
-          id: uuidv4(),
-          content: text,
-          type: 'text',
-          attachment_path: null,
-          app_icon: null,
-          app_name: null
-        }
-        const result = this.databaseBuilder.createClipboard(item)
-        if (result) {
-          this.mainWindow.webContents.send('set:clipboard', result)
-        }
-      }
+      onTextChange: (text: string) => this.processSaveClipboard(text)
     })
+  }
+
+  processSaveClipboard(text: string) {
+    if (text.trim().length == 0 || this.mainWindow.isVisible()) {
+      return
+    }
+    const item: IClipboardManager = {
+      id: uuidv4(),
+      content: text,
+      type: 'text',
+      attachment_path: null,
+      app_icon: null,
+      app_name: null
+    }
+    const result = this.databaseBuilder.createClipboard(item)
+    if (result) {
+      this.mainWindow.webContents.send('set:clipboard', result)
+    }
   }
 
   init(): void {

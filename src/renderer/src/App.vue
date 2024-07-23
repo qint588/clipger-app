@@ -1,6 +1,8 @@
+
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import moment from 'moment'
+// @ts-ignore (define in dts)
 import { IClipboardManager, LIMIT_SIZE } from '../../main/types/clipboard'
 
 const search = ref<string>('')
@@ -19,7 +21,8 @@ onMounted(() => {
 
   // @ts-ignore (define in dts)
   window.electron.ipcRenderer.on('set:clipboard', (_: never, value: IClipboardManager) => {
-    clipboards.value = [value, ...clipboards.value].slice(0, LIMIT_SIZE)
+    if (!value) return
+    handleFetchClipboard()
   })
 
   // @ts-ignore (define in dts)
@@ -60,15 +63,7 @@ onMounted(() => {
   // @ts-ignore (define in dts)
   window.electron.ipcRenderer.on('set:clipboard-deleted', (_: never, result: boolean) => {
     if (!result) return
-    const data = getDataSelected()
-    const newClipboards = [
-      ...clipboards.value.slice(0, data.index),
-      ...clipboards.value.slice(data.index + 1)
-    ]
-    if (data.index > 0) {
-      indexActive.value = indexActive.value - 1
-    }
-    clipboards.value = newClipboards
+    handleFetchClipboard()
   })
 
   // @ts-ignore (define in dts)
@@ -240,6 +235,7 @@ const handleClear = () => {
             :key="index"
             :class="{ active: index === indexActive }"
             @mouseover="handleChangeIndexActive(index)"
+            @dblclick="handleSelected()"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -276,7 +272,7 @@ const handleClear = () => {
           <div class="heading">
             <span>
               <small
-                >First copied {{ moment(clipboard.created_at).fromNow() }} in Google Chrome</small
+                >First copied {{ moment(clipboard.created_at).fromNow() }} in Clipger</small
               >
             </span>
           </div>
@@ -288,7 +284,6 @@ const handleClear = () => {
           <div class="footer-action">
             <button @click.prevent="handleSelected">Press enter to copy</button>
             <button @click.prevent="handleDelete">Delete from history</button>
-            <button>Pin to history</button>
           </div>
         </template>
       </div>

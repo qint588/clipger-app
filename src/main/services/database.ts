@@ -39,10 +39,21 @@ export default class DatabaseBuilder {
   }
 
   createClipboard(data: IClipboardManager): IClipboardManager | null {
+    const clipboardExist = this.findClipboardByContent(data.content)
+    if (clipboardExist) {
+      this.deleteClipboard(clipboardExist.id)
+    }
     const sql = `INSERT INTO clipboard_histories (id, content, attachment_path, type, app_icon, app_name)
         VALUES (@id, @content, @attachment_path, @type, @app_icon, @app_name)`
     this.getInstant().prepare(sql).run(data)
     return this.findClipboard(data.id)
+  }
+
+  findClipboardByContent(content: string): IClipboardManager | null {
+    const queryBuilder = this.getInstant().prepare(
+      'SELECT * FROM clipboard_histories WHERE content = ?'
+    )
+    return queryBuilder.get(content) as IClipboardManager | null
   }
 
   findClipboard(id: string): IClipboardManager | null {
