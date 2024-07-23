@@ -1,10 +1,10 @@
-import electron, { app, BrowserWindow, ipcMain, NativeImage } from 'electron'
+import electron, { app, BrowserWindow, ipcMain, nativeImage, NativeImage } from 'electron'
 import ClipboardWatcher from 'electron-clipboard-watcher'
 import DatabaseBuilder from './database'
 import { v4 as uuidv4 } from 'uuid'
 import { IClipboardManager } from '../types/clipboard'
 import { execSync } from 'child_process'
-import { getPathImage, showNotification } from '../utils'
+import { getPathImage, now, showNotification } from '../utils'
 import sharp from 'sharp'
 import path from 'path'
 
@@ -16,6 +16,7 @@ interface DataSelectedEvent {
 export default class ClipboardManager {
   protected mainWindow: BrowserWindow
   protected databaseBuilder!: DatabaseBuilder
+  private isDisableListener: boolean = false
 
   constructor() {
     this.mainWindow = app['mainWindow']
@@ -44,6 +45,7 @@ export default class ClipboardManager {
   }
 
   async processSaveClipboardImage(nativeImage: NativeImage) {
+    if (this.isDisableListener) return
     const folderImagePath = getPathImage()
     const item: IClipboardManager = {
       id: uuidv4(),
@@ -65,6 +67,7 @@ export default class ClipboardManager {
   }
 
   processSaveClipboardText(text: string) {
+    if (this.isDisableListener) return
     if (text.trim().length == 0 || this.mainWindow.isVisible()) {
       return
     }
@@ -80,6 +83,10 @@ export default class ClipboardManager {
   }
 
   processSaveClipboard(item: IClipboardManager) {
+    item = {
+      ...item,
+      created_at: now()
+    }
     const result = this.databaseBuilder.createClipboard(item)
     if (result) {
       this.mainWindow.webContents.send('set:clipboard', result)
@@ -115,11 +122,15 @@ export default class ClipboardManager {
   }
 
   processSelected(data: DataSelectedEvent) {
+    this.isDisableListener = true
     const clipboard = this.databaseBuilder.findClipboard(data.id ?? '')
     if (clipboard) {
       this.copyToClipboard(clipboard)
       this.pasteToCurrentApp()
     }
+    setTimeout(() => {
+      this.isDisableListener = false
+    }, 1000)
   }
 
   async processDelete(data: DataSelectedEvent) {
@@ -145,6 +156,12 @@ export default class ClipboardManager {
     if (clipboard.type === 'text' && clipboard.content.length) {
       electron.clipboard.writeText(clipboard.content, 'clipboard')
     }
+    if (clipboard.type === 'image') {
+      const image = nativeImage.createFromPath(clipboard.content)
+      electron.clipboard.writeImage(image)
+      this.databaseBuilder.transferClipboardToTop(clipboard.id)
+    }
+    this.mainWindow.webContents.send('set:clipboard-reload', true)
   }
 
   async pasteToCurrentApp(): Promise<void> {

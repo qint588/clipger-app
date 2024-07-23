@@ -1,5 +1,6 @@
 import { app, Notification } from 'electron'
 import fs from 'fs'
+import moment from 'moment'
 import path from 'path'
 
 export const getPathDatabase = (): string => {
@@ -36,4 +37,8 @@ export const showNotification = (message: string): void => {
     body: message
   }
   new Notification(settings).show()
+}
+
+export const now = () => {
+  return moment().format('YYYY-MM-DD HH:mm:ss')
 }

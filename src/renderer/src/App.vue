@@ -56,6 +56,11 @@ onMounted(() => {
   })
 
   // @ts-ignore (define in dts)
+  window.electron.ipcRenderer.on('set:clipboard-reload', () => {
+    handleFetchClipboard()
+  })
+
+  // @ts-ignore (define in dts)
   window.electron.ipcRenderer.on('get:clipboard-delete', () => {
     handleDelete()
   })
