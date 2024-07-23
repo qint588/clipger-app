@@ -251,7 +251,7 @@ const handleClear = () => {
                 d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
               />
             </svg>
-            <span class="text-content">{{ item.content }}</span>
+            <span class="text-content">{{ item.type === 'text' ? item.content : '[Image]' }}</span>
             <div class="shortcut">
               <template v-if="index <= 9">
                 <img
@@ -279,6 +279,9 @@ const handleClear = () => {
           <div class="showed">
             <div v-if="clipboard.type === 'text'" class="copied">
               <span>{{ clipboard.content }}</span>
+            </div>
+            <div v-if="clipboard.type === 'image'" class="copied">
+              <img :src="`file://${clipboard.content}`" alt="" />
             </div>
           </div>
           <div class="footer-action">

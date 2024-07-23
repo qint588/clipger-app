@@ -26,6 +26,7 @@
     "child_process": "^1.0.2",
     "electron-updater": "^6.1.7",
     "moment": "^2.30.1",
+    "sharp": "^0.33.4",
     "uuid": "^10.0.0",
     "uuidv4": "^6.2.13",
     "wxw": "^1.89.0"

@@ -18,6 +18,17 @@ export const getPathDatabase = (): string => {
   return fileDatabasePath
 }
 
+export const getPathImage = (): string => {
+  const userDataPath = app.getPath('userData')
+
+  const folderPath = path.join(userDataPath, 'Images')
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true })
+  }
+
+  return folderPath
+}
+
 export const showNotification = (message: string): void => {
   const title = 'Clipger App'
   const settings = {

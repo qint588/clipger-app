@@ -1,10 +1,12 @@
-import electron, { app, BrowserWindow, ipcMain } from 'electron'
+import electron, { app, BrowserWindow, ipcMain, NativeImage } from 'electron'
 import ClipboardWatcher from 'electron-clipboard-watcher'
 import DatabaseBuilder from './database'
 import { v4 as uuidv4 } from 'uuid'
 import { IClipboardManager } from '../types/clipboard'
 import { execSync } from 'child_process'
-import { showNotification } from '../utils'
+import { getPathImage, showNotification } from '../utils'
+import sharp from 'sharp'
+import path from 'path'
 
 interface DataSelectedEvent {
   index: number
@@ -34,16 +36,35 @@ export default class ClipboardManager {
       watchDelay: 500,
 
       // handler for when image data is copied into the clipboard
-      onImageChange: (nativeImage: never) => {
-        console.log(nativeImage)
-      },
+      onImageChange: (nativeImage: NativeImage) => this.processSaveClipboardImage(nativeImage),
 
       // handler for when text data is copied into the clipboard
-      onTextChange: (text: string) => this.processSaveClipboard(text)
+      onTextChange: (text: string) => this.processSaveClipboardText(text)
     })
   }
 
-  processSaveClipboard(text: string) {
+  async processSaveClipboardImage(nativeImage: NativeImage) {
+    const folderImagePath = getPathImage()
+    const item: IClipboardManager = {
+      id: uuidv4(),
+      content: '',
+      type: 'image',
+      attachment_path: null,
+      app_icon: null,
+      app_name: null
+    }
+    const fileName = item.id + '.png'
+    item.content = path.join(folderImagePath, fileName)
+    const buffer = nativeImage.toPNG()
+    try {
+      await sharp(buffer).toFile(item.content)
+      this.processSaveClipboard(item)
+    } catch (error: any) {
+      showNotification('Error saving TIFF file: ' + error.message)
+    }
+  }
+
+  processSaveClipboardText(text: string) {
     if (text.trim().length == 0 || this.mainWindow.isVisible()) {
       return
     }
@@ -55,6 +76,10 @@ export default class ClipboardManager {
       app_icon: null,
       app_name: null
     }
+    this.processSaveClipboard(item)
+  }
+
+  processSaveClipboard(item: IClipboardManager) {
     const result = this.databaseBuilder.createClipboard(item)
     if (result) {
       this.mainWindow.webContents.send('set:clipboard', result)

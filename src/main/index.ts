@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, protocol } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import createMainWindow from './screens/main.screen'
 import ClipboardManager from './services/clipboard'
@@ -15,6 +15,16 @@ function init() {
   app['shortCutBuilder'] = new ShortCutBuilder()
   app['shortCutBuilder'].build()
 }
+
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'app',
+    privileges: {
+      standard: true,
+      secure: true
+    }
+  }
+])
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
