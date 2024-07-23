@@ -1,6 +1,8 @@
 import { getPathDatabase } from '../utils'
 import Database from 'better-sqlite3'
 import { IClipboardManager, LIMIT_SIZE } from '../types/clipboard'
+import fs from 'fs'
+import { relativeTimeRounding } from 'moment'
 
 export default class DatabaseBuilder {
   private db!: Database.Database
@@ -68,9 +70,19 @@ export default class DatabaseBuilder {
     return queryBuilder.all(limit) as Array<IClipboardManager>
   }
 
-  deleteClipboard(id: string): boolean {
+  async deleteClipboard(id: string): Promise<boolean> {
+    const clipboard = this.findClipboard(id)
+    if (!clipboard) {
+      return false
+    }
+
     const sql = 'DELETE FROM clipboard_histories WHERE id = ?'
-    return !!this.getInstant().prepare(sql).run(id)
+    const result = !!this.getInstant().prepare(sql).run(id)
+
+    if (result && clipboard.type === 'image') {
+      await fs.unlinkSync(clipboard.content)
+    }
+    return true
   }
 
   clearClipboards(): boolean {

@@ -122,13 +122,12 @@ export default class ClipboardManager {
     }
   }
 
-  processDelete(data: DataSelectedEvent) {
+  async processDelete(data: DataSelectedEvent) {
     if (!data.id) return
 
-    const result = this.databaseBuilder.deleteClipboard(data.id)
+    const result = await this.databaseBuilder.deleteClipboard(data.id)
     if (result) {
-      this.mainWindow.webContents.send('set:clipboard-deleted', result)
-      return
+      return this.mainWindow.webContents.send('set:clipboard-deleted', result)
     }
     showNotification('Error: fail on delete')
   }
