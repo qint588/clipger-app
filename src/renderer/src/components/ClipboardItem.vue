@@ -14,7 +14,8 @@ interface Emit {
   (e: 'handleSelected'): void
 }
 
-const {clipboard, isActive, index} = defineProps<Props>()
+defineProps<Props>()
+defineEmits<Emit>()
 </script>
 
 <template>
@@ -52,3 +53,9 @@ const {clipboard, isActive, index} = defineProps<Props>()
     </div>
   </li>
 </template>
+
+<style lang="scss" scoped>
+.text-content {
+  font-size: 16px;
+}
+</style>
