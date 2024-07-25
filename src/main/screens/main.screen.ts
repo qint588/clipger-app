@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol, shell } from 'electron'
+import { app, BrowserWindow, shell } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
@@ -42,8 +42,17 @@ export default function createMainWindow(): BrowserWindow {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html')).then()
   }
 
-  mainWindow.on('close', () => {
-    app.quit()
+  mainWindow.on('close', (event) => {
+    if (is.dev) {
+      app.quit()
+    } else {
+      event.preventDefault() // Prevent the default close behavior
+      if (!app['isQuit']) {
+        mainWindow.hide()
+      } else {
+        app.quit()
+      }
+    }
   })
 
   mainWindow.on('blur', () => {

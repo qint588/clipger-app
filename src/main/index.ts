@@ -1,4 +1,4 @@
-import { app, protocol } from 'electron'
+import { app, BrowserWindow, protocol } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import createMainWindow from './screens/main.screen'
 import ClipboardManager from './services/clipboard'
@@ -6,6 +6,7 @@ import ShortCutBuilder from './shortcut'
 import TrayBuilder from './tray'
 
 function init() {
+  app['isQuit'] = true
   app['mainWindow'] = createMainWindow()
 
   new TrayBuilder().build()
@@ -34,6 +35,12 @@ app.whenReady().then(() => {
   })
 
   init()
+
+  app.on('activate', () => {
+    init()
+    if (BrowserWindow.getAllWindows().length === 0) init()
+    else app['mainWindow'].show() // Show the window when the app is activated
+  })
 })
 
 app.on('window-all-closed', () => {
