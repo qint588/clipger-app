@@ -14,9 +14,9 @@ import { IClipboardManager } from '../../main/types/clipboard'
 
 const search = ref<string>('')
 const inputSearch = ref<HTMLElement | null>(null)
-const isSearch = computed(() => search.value.length)
 const clipboards = ref<IClipboardManager[]>([])
 const indexActive = ref<number>(0)
+const tabActive = ref<string>('list')
 
 onMounted(() => {
   // @ts-ignore (define in dts)
@@ -150,7 +150,7 @@ const handleClear = () => {
 
 <template>
   <div class="card">
-    <NavbarComponent />
+    <NavbarComponent :tab-active="tabActive" />
     <div class="main">
       <SearchInputComponent
         v-model="search"
@@ -186,3 +186,14 @@ const handleClear = () => {
 </template>
 
 <style lang="scss" src="./assets/main.scss"></style>
+<style lang="scss" scoped>
+.card {
+  display: flex;
+  flex-direction: row;
+  width: 100vw;
+  .main {
+    flex: 1;
+    width: calc(100vw - 55px);
+  }
+}
+</style>
