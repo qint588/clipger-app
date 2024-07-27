@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 // @ts-ignore (define in dts)
 import PreviewComponent from './components/Preview.vue'
 // @ts-ignore (define in dts)
@@ -11,6 +11,7 @@ import NavbarComponent from './components/Navbar.vue'
 import SearchInputComponent from './components/SearchInput.vue'
 // @ts-ignore (define in dts)
 import { IClipboardManager } from '../../main/types/clipboard'
+import lodash from 'lodash'
 
 const search = ref<string>('')
 const inputSearch = ref<HTMLElement | null>(null)
@@ -53,6 +54,7 @@ onMounted(() => {
   // @ts-ignore (define in dts)
   window.electron.ipcRenderer.on('push:clipboards', (_: never, data: IClipboardManager[]) => {
     clipboards.value = data
+    indexActive.value = 0
   })
 
   handleFetchClipboard()
@@ -86,6 +88,13 @@ onMounted(() => {
   })
 })
 
+watch(
+  search,
+  lodash.debounce((newValue) => {
+    handleFetchClipboard()
+  }, 500)
+)
+
 const clipboard = computed<IClipboardManager | null>(() => {
   return clipboards.value[indexActive.value] ?? null
 })
@@ -100,15 +109,18 @@ const focusInputSearch = () => {
 }
 
 const handleFetchClipboard = (isConfirm: boolean = false) => {
-  if(isConfirm) {
+  const params = {
+    keyword: search.value
+  }
+  if (isConfirm) {
     if (confirm('Are you sure you want to reload?') === true) {
       // @ts-ignore (define in dts)
-      window.electron.ipcRenderer.send('get:clipboards')
+      window.electron.ipcRenderer.send('get:clipboards', params)
     }
     return
   }
   // @ts-ignore (define in dts)
-  window.electron.ipcRenderer.send('get:clipboards')
+  window.electron.ipcRenderer.send('get:clipboards', params)
 }
 
 const handleChangeIndexActive = (index: number) => {

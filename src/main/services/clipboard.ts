@@ -114,8 +114,8 @@ export default class ClipboardManager {
   }
 
   init(): void {
-    ipcMain.on('get:clipboards', () => {
-      const clipboards = this.databaseBuilder.findClipboards()
+    ipcMain.on('get:clipboards', (_, filters: { keyword?: string }) => {
+      const clipboards = this.databaseBuilder.findClipboards(filters)
       this.mainWindow.webContents.send('push:clipboards', clipboards)
     })
 

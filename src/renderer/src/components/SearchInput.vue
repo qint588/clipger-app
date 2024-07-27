@@ -6,7 +6,7 @@ interface Props {
   modelValue: string
 }
 
-interface Emit {
+interface Emit {   
   (e: 'update:modelValue', value: string): void
   (e: 'handleClearSearch'): void
   (e: 'handleFetchClipboard'): void

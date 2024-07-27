@@ -70,10 +70,18 @@ export default class DatabaseBuilder {
     return queryBuilder.get(id) as IClipboardManager | null
   }
 
-  findClipboards(limit: number = LIMIT_SIZE): Array<IClipboardManager> {
-    const queryBuilder = this.getInstant().prepare(
-      'SELECT * FROM clipboard_histories ORDER BY created_at DESC LIMIT ?'
-    )
+  findClipboards(
+    filters: { keyword: string },
+    limit: number = LIMIT_SIZE
+  ): Array<IClipboardManager> {
+    let sql = 'SELECT * FROM clipboard_histories'
+    if (filters?.keyword) {
+      sql += ` WHERE clipboard_histories.content LIKE '%${filters?.keyword}%' `
+    }
+    if (limit) {
+      sql += ` ORDER BY created_at DESC LIMIT ?`
+    }
+    const queryBuilder = this.getInstant().prepare(sql)
     return queryBuilder.all(limit) as Array<IClipboardManager>
   }
 
