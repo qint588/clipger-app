@@ -1,9 +1,14 @@
-import { app, BrowserWindow, shell } from 'electron'
-import { join } from 'path'
+import { app, BrowserWindow, protocol, shell } from 'electron'
+import path, { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import icon from '../../../resources/icon.png?asset'
 
 export default function createMainWindow(): BrowserWindow {
+  protocol.registerFileProtocol('local-icon', (request, callback) => {
+    const url = request.url.substr(12)
+    const filePath = path.normalize(`${__dirname}/${url}`)
+    callback({ path: filePath })
+  })
   const mainWindow = new BrowserWindow({
     width: 940,
     height: 584,

@@ -22,23 +22,9 @@ defineEmits<Emit>()
   <li
     :class="{ active: isActive }"
     @mouseover="$emit('handleChangeIndexActive', index)"
-    @dblclick="$emit('handleSelected')"
+    @click="$emit('handleSelected')"
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-      class="icon-history"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-      />
-    </svg>
-    <span class="text-content">{{ clipboard.type === 'text' ? clipboard.content : '[Image]' }}</span>
+    <span class="text-content">{{ clipboard.content }}</span>
     <div class="shortcut">
       <template v-if="index <= 9">
         <img

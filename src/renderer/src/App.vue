@@ -99,7 +99,14 @@ const focusInputSearch = () => {
   inputSearch.value?.focus()
 }
 
-const handleFetchClipboard = () => {
+const handleFetchClipboard = (isConfirm: boolean = false) => {
+  if(isConfirm) {
+    if (confirm('Are you sure you want to reload?') === true) {
+      // @ts-ignore (define in dts)
+      window.electron.ipcRenderer.send('get:clipboards')
+    }
+    return
+  }
   // @ts-ignore (define in dts)
   window.electron.ipcRenderer.send('get:clipboards')
 }
@@ -143,8 +150,10 @@ const handleDelete = () => {
 }
 
 const handleClear = () => {
-  // @ts-ignore (define in dts)
-  window.electron.ipcRenderer.send('set:clipboard-clear', true)
+  if (confirm('Are you sure you want to delete?') === true) {
+    // @ts-ignore (define in dts)
+    window.electron.ipcRenderer.send('set:clipboard-clear', true)
+  }
 }
 </script>
 
@@ -155,7 +164,7 @@ const handleClear = () => {
       <SearchInputComponent
         v-model="search"
         @handleClearSearch="handleClearSearch"
-        @handleFetchClipboard="handleFetchClipboard"
+        @handleFetchClipboard="() => handleFetchClipboard(true)"
         @handleClear="handleClear"
       />
       <div class="content">
