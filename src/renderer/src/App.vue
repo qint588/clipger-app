@@ -22,7 +22,7 @@ onMounted(() => {
   // @ts-ignore (define in dts)
   window.electron.ipcRenderer.on('set:focus-input', (_: never, value: boolean) => {
     if (!value) return
-    indexActive.value = 0
+    handleResetData()
     focusInputSearch()
   })
 
@@ -155,6 +155,11 @@ const handleClear = () => {
     window.electron.ipcRenderer.send('set:clipboard-clear', true)
   }
 }
+
+const handleResetData = () => {
+  indexActive.value = 0
+  search.value = ''
+}
 </script>
 
 <template>
@@ -195,14 +200,3 @@ const handleClear = () => {
 </template>
 
 <style lang="scss" src="./assets/main.scss"></style>
-<style lang="scss" scoped>
-.card {
-  display: flex;
-  flex-direction: row;
-  width: 100vw;
-  .main {
-    flex: 1;
-    width: calc(100vw - 55px);
-  }
-}
-</style>

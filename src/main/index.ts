@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol } from 'electron'
+import { app, BrowserWindow, globalShortcut, protocol } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import createMainWindow from './screens/main.screen'
 import ClipboardManager from './services/clipboard'
