@@ -23,6 +23,7 @@ export default class TrayBuilder {
       {
         label: 'Quit',
         click: () => {
+          app['isQuit'] = true
           app.quit()
         }
       }

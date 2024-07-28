@@ -15,9 +15,9 @@ defineProps<Props>()
       <li :class="{'active': tabActive === 'list'}">
         <IconComponent name="clipboard-document" />
       </li>
-      <li :class="{'active': tabActive === 'pinned'}">
+      <!-- <li :class="{'active': tabActive === 'pinned'}">
         <IconComponent name="bookmark" />
-      </li>
+      </li> -->
     </ul>
   </div>
 </template>

@@ -48,12 +48,13 @@ export default function createMainWindow(): BrowserWindow {
   }
 
   mainWindow.on('close', (event) => {
-    if (is.dev) {
+    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
       app.quit()
     } else {
-      event.preventDefault() // Prevent the default close behavior
+      console.log(app['isQuit'])
       if (!app['isQuit']) {
         mainWindow.hide()
+        event.preventDefault()
       } else {
         app.quit()
       }

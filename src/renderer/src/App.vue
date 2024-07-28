@@ -187,7 +187,7 @@ const handleResetData = () => {
 
 <template>
   <div class="card">
-    <NavbarComponent :tab-active="tabActive" />
+    <!-- <NavbarComponent :tab-active="tabActive" /> -->
     <div class="main">
       <SearchInputComponent
         v-model="search"
