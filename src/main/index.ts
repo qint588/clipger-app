@@ -6,7 +6,7 @@ import ShortCutBuilder from './shortcut'
 import TrayBuilder from './tray'
 
 function init() {
-  app['isQuit'] = true
+  app['isQuit'] = false
   app['mainWindow'] = createMainWindow()
 
   new TrayBuilder().build()

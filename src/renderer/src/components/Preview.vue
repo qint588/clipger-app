@@ -4,25 +4,22 @@ import { IClipboardManager } from '../../../main/types/clipboard'
 import moment from 'moment'
 
 interface Props {
-  clipboard: IClipboardManager,
+  clipboard: IClipboardManager
 }
 
 interface Emit {
-  (e: 'handleSelected'): void,
+  (e: 'handleSelected'): void
   (e: 'handleDelete'): void
 }
 
-const {clipboard} = defineProps<Props>()
-
+defineProps<Props>()
 defineEmits<Emit>()
 </script>
 
 <template>
   <div class="heading">
     <span>
-      <small
-        >First copied {{ moment(clipboard.created_at).fromNow() }} in Clipger</small
-      >
+      <small>First copied {{ moment(clipboard.created_at).fromNow() }} in {{ clipboard.app_name }}</small>
     </span>
   </div>
   <div class="showed">
@@ -30,7 +27,7 @@ defineEmits<Emit>()
       <span>{{ clipboard.content }}</span>
     </div>
     <div v-if="clipboard.type === 'image'" class="copied">
-      <img :src="`file://${clipboard.content}`" alt="" />
+      <img :src="`file://${clipboard.attachment_path}`" alt="" />
     </div>
   </div>
   <div class="footer-action">

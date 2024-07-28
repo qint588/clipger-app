@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 // @ts-ignore (define in dts)
 import PreviewComponent from './components/Preview.vue'
 // @ts-ignore (define in dts)
@@ -11,18 +11,19 @@ import NavbarComponent from './components/Navbar.vue'
 import SearchInputComponent from './components/SearchInput.vue'
 // @ts-ignore (define in dts)
 import { IClipboardManager } from '../../main/types/clipboard'
+import lodash from 'lodash'
 
 const search = ref<string>('')
 const inputSearch = ref<HTMLElement | null>(null)
-const isSearch = computed(() => search.value.length)
 const clipboards = ref<IClipboardManager[]>([])
 const indexActive = ref<number>(0)
+const tabActive = ref<string>('list')
 
 onMounted(() => {
   // @ts-ignore (define in dts)
   window.electron.ipcRenderer.on('set:focus-input', (_: never, value: boolean) => {
     if (!value) return
-    indexActive.value = 0
+    handleResetData()
     focusInputSearch()
   })
 
@@ -53,6 +54,7 @@ onMounted(() => {
   // @ts-ignore (define in dts)
   window.electron.ipcRenderer.on('push:clipboards', (_: never, data: IClipboardManager[]) => {
     clipboards.value = data
+    indexActive.value = 0
   })
 
   handleFetchClipboard()
@@ -84,7 +86,25 @@ onMounted(() => {
     indexActive.value = 0
     clipboards.value = []
   })
+
+  // @ts-ignore (define in dts)
+  window.electron.ipcRenderer.on('set:tab-active', (_: never, tab: string) => {
+    tabActive.value = tab
+  })
+
+  // @ts-ignore (define in dts)
+  window.electron.ipcRenderer.on('set:index-clipboard-selected', (_: never, index: number) => {
+    indexActive.value = index
+    handleSelected()
+  })
 })
+
+watch(
+  search,
+  lodash.debounce((newValue) => {
+    handleFetchClipboard()
+  }, 500)
+)
 
 const clipboard = computed<IClipboardManager | null>(() => {
   return clipboards.value[indexActive.value] ?? null
@@ -99,9 +119,19 @@ const focusInputSearch = () => {
   inputSearch.value?.focus()
 }
 
-const handleFetchClipboard = () => {
+const handleFetchClipboard = (isConfirm: boolean = false) => {
+  const params = {
+    keyword: search.value
+  }
+  if (isConfirm) {
+    if (confirm('Are you sure you want to reload?') === true) {
+      // @ts-ignore (define in dts)
+      window.electron.ipcRenderer.send('get:clipboards', params)
+    }
+    return
+  }
   // @ts-ignore (define in dts)
-  window.electron.ipcRenderer.send('get:clipboards')
+  window.electron.ipcRenderer.send('get:clipboards', params)
 }
 
 const handleChangeIndexActive = (index: number) => {
@@ -143,19 +173,26 @@ const handleDelete = () => {
 }
 
 const handleClear = () => {
-  // @ts-ignore (define in dts)
-  window.electron.ipcRenderer.send('set:clipboard-clear', true)
+  if (confirm('Are you sure you want to delete?') === true) {
+    // @ts-ignore (define in dts)
+    window.electron.ipcRenderer.send('set:clipboard-clear', true)
+  }
+}
+
+const handleResetData = () => {
+  indexActive.value = 0
+  search.value = ''
 }
 </script>
 
 <template>
   <div class="card">
-    <NavbarComponent />
+    <!-- <NavbarComponent :tab-active="tabActive" /> -->
     <div class="main">
       <SearchInputComponent
         v-model="search"
         @handleClearSearch="handleClearSearch"
-        @handleFetchClipboard="handleFetchClipboard"
+        @handleFetchClipboard="() => handleFetchClipboard(true)"
         @handleClear="handleClear"
       />
       <div class="content">
@@ -172,7 +209,7 @@ const handleClear = () => {
             />
           </ul>
         </div>
-        <div class="right">
+        <div class="right" v-if="clipboard">
           <PreviewComponent
             v-if="clipboard"
             :clipboard="clipboard"

@@ -6,16 +6,15 @@ interface Props {
   modelValue: string
 }
 
-interface Emit {
-  (e: 'update:modelValue', value: string): void,
-  (e: 'handleClearSearch'): void,
-  (e: 'handleFetchClipboard'): void,
+interface Emit {   
+  (e: 'update:modelValue', value: string): void
+  (e: 'handleClearSearch'): void
+  (e: 'handleFetchClipboard'): void
   (e: 'handleClear'): void
 }
 
 defineProps<Props>()
 defineEmits<Emit>()
-
 </script>
 
 <template>

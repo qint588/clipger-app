@@ -4,9 +4,10 @@ import DatabaseBuilder from './database'
 import { v4 as uuidv4 } from 'uuid'
 import { IClipboardManager } from '../types/clipboard'
 import { execSync } from 'child_process'
-import { getPathImage, now, showNotification } from '../utils'
+import { formatBytes, getAppInformation, getPathImage, now, showNotification } from '../utils'
 import sharp from 'sharp'
 import path from 'path'
+import fs from 'fs'
 
 interface DataSelectedEvent {
   index: number
@@ -56,13 +57,29 @@ export default class ClipboardManager {
       app_name: null
     }
     const fileName = item.id + '.png'
-    item.content = path.join(folderImagePath, fileName)
+    item.attachment_path = path.join(folderImagePath, fileName)
     const buffer = nativeImage.toPNG()
     try {
-      await sharp(buffer).toFile(item.content)
+      const { width, height } = nativeImage.getSize()
+      let content = `Image ${width}x${height}px`
+      await sharp(buffer).toFile(item.attachment_path)
+      const stats: fs.Stats = await new Promise((resolve, reject) => {
+        if (!item.attachment_path) {
+          reject('Attachment path is null')
+          return
+        }
+        fs.stat(item.attachment_path, (err, stats) => {
+          if (err) {
+            reject(err)
+            return
+          }
+          resolve(stats)
+        })
+      })
+      item.content = `${content} ${formatBytes(stats.size)}`
       this.processSaveClipboard(item)
     } catch (error: any) {
-      showNotification('Error saving TIFF file: ' + error.message)
+      showNotification('Error: ' + error.message)
     }
   }
 
@@ -82,10 +99,13 @@ export default class ClipboardManager {
     this.processSaveClipboard(item)
   }
 
-  processSaveClipboard(item: IClipboardManager) {
+  async processSaveClipboard(item: IClipboardManager) {
+    const appInformation = await getAppInformation()
     item = {
       ...item,
-      created_at: now()
+      created_at: now(),
+      app_icon: appInformation.iconPath,
+      app_name: appInformation.name
     }
     const result = this.databaseBuilder.createClipboard(item)
     if (result) {
@@ -94,8 +114,8 @@ export default class ClipboardManager {
   }
 
   init(): void {
-    ipcMain.on('get:clipboards', () => {
-      const clipboards = this.databaseBuilder.findClipboards()
+    ipcMain.on('get:clipboards', (_, filters: { keyword?: string }) => {
+      const clipboards = this.databaseBuilder.findClipboards(filters)
       this.mainWindow.webContents.send('push:clipboards', clipboards)
     })
 
@@ -115,6 +135,10 @@ export default class ClipboardManager {
 
   selected(): void {
     this.mainWindow.webContents.send('get:clipboard-selected', true)
+  }
+
+  setSelected(index: number): void {
+    this.mainWindow.webContents.send('set:index-clipboard-selected', index)
   }
 
   delete(): void {
@@ -176,5 +200,9 @@ export default class ClipboardManager {
       await new Promise((resolve) => setTimeout(resolve, 750))
       app.dock.hide()
     }
+  }
+
+  setTab(tab: 'list' | 'pinned') {
+    this.mainWindow.webContents.send('set:tab-active', tab)
   }
 }
