@@ -31,6 +31,7 @@ export default class ShortCutBuilder {
     for (let i = 0; i <= 9; i++) {
       localShortcut.register(`Command+${i}`, () => {
         console.log({ i })
+        this.clipboardManager.setSelected(i === 0 ? 9 : i - 1)
       })
     }
   }

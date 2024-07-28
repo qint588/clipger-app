@@ -137,6 +137,10 @@ export default class ClipboardManager {
     this.mainWindow.webContents.send('get:clipboard-selected', true)
   }
 
+  setSelected(index: number): void {
+    this.mainWindow.webContents.send('set:index-clipboard-selected', index)
+  }
+
   delete(): void {
     this.mainWindow.webContents.send('get:clipboard-delete', true)
   }

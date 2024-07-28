@@ -91,6 +91,12 @@ onMounted(() => {
   window.electron.ipcRenderer.on('set:tab-active', (_: never, tab: string) => {
     tabActive.value = tab
   })
+
+  // @ts-ignore (define in dts)
+  window.electron.ipcRenderer.on('set:index-clipboard-selected', (_: never, index: number) => {
+    indexActive.value = index
+    handleSelected()
+  })
 })
 
 watch(
