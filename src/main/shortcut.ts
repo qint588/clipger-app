@@ -1,6 +1,7 @@
 import { app, BrowserWindow, globalShortcut } from 'electron'
 import ClipboardManager from './services/clipboard'
 import localShortcut from 'electron-localshortcut'
+import { showNotification } from './utils'
 
 export default class ShortCutBuilder {
   mainWindow: BrowserWindow
@@ -12,7 +13,7 @@ export default class ShortCutBuilder {
   }
 
   build() {
-    globalShortcut.register('Control+space', () => {
+    globalShortcut.register('Command+shift+space', () => {
       !this.mainWindow.isVisible() ? this.mainWindow.show() : this.mainWindow.hide()
     })
 
@@ -21,5 +22,16 @@ export default class ShortCutBuilder {
       this.clipboardManager.selected()
     })
     localShortcut.register('Command+X', () => this.clipboardManager.delete())
+    localShortcut.register('Command+L', () => {
+      this.clipboardManager.setTab('list')
+    })
+    localShortcut.register('Command+P', () => {
+      this.clipboardManager.setTab('pinned')
+    })
+    for (let i = 0; i <= 9; i++) {
+      localShortcut.register(`Command+${i}`, () => {
+        console.log({ i })
+      })
+    }
   }
 }

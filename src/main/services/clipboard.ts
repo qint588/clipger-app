@@ -197,4 +197,8 @@ export default class ClipboardManager {
       app.dock.hide()
     }
   }
+
+  setTab(tab: 'list' | 'pinned') {
+    this.mainWindow.webContents.send('set:tab-active', tab)
+  }
 }

@@ -71,7 +71,7 @@ export default class DatabaseBuilder {
   }
 
   findClipboards(
-    filters: { keyword: string },
+    filters: { keyword?: string },
     limit: number = LIMIT_SIZE
   ): Array<IClipboardManager> {
     let sql = 'SELECT * FROM clipboard_histories'

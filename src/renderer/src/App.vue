@@ -86,6 +86,11 @@ onMounted(() => {
     indexActive.value = 0
     clipboards.value = []
   })
+
+  // @ts-ignore (define in dts)
+  window.electron.ipcRenderer.on('set:tab-active', (_: never, tab: string) => {
+    tabActive.value = tab
+  })
 })
 
 watch(
@@ -198,7 +203,7 @@ const handleResetData = () => {
             />
           </ul>
         </div>
-        <div class="right">
+        <div class="right" v-if="clipboard">
           <PreviewComponent
             v-if="clipboard"
             :clipboard="clipboard"
